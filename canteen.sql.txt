@@ -1,0 +1,61 @@
+-- ✅ Always recreate fresh tables (prevents duplicates)
+DROP TABLE IF EXISTS Beverages;
+DROP TABLE IF EXISTS Snacks;
+DROP TABLE IF EXISTS Meals;
+DROP TABLE IF EXISTS Orders;
+
+-- ✅ Create tables cleanly
+CREATE TABLE Beverages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price REAL NOT NULL
+);
+
+CREATE TABLE Snacks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price REAL NOT NULL
+);
+
+CREATE TABLE Meals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price REAL NOT NULL
+);
+
+CREATE TABLE Orders (
+    order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    total REAL NOT NULL,
+    order_time TEXT NOT NULL
+);
+
+-- ✅ Sample data (NO Duplicates)
+INSERT INTO Beverages (name, price) VALUES
+('Lemon', 15),
+('Iced Tea', 20),
+('Coffee', 50),
+('Gulaman', 10),
+('Bottled Water', 10),
+('Softdrinks', 15);
+
+INSERT INTO Snacks (name, price) VALUES
+('Corndog', 25),
+('Burger', 30),
+('Turon', 15),
+('Ice Cream', 20),
+('Donut', 20),
+('Siopao', 25),
+('Siomai', 20),
+('Chicken Fillet', 35);
+
+INSERT INTO Meals (name, price) VALUES
+('Sisig', 70),
+('Pares', 60),
+('Siomai Rice', 35),
+('Tapsilog', 40),
+('Pastil', 25),
+('BBQ', 25),
+('Hotsilog', 40),
+('Longsilog', 40);
