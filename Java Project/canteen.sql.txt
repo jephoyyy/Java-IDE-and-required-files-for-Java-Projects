@@ -1,10 +1,11 @@
--- ✅ Always recreate fresh tables (prevents duplicates)
+-- DELETE OLD TABLES
 DROP TABLE IF EXISTS Beverages;
 DROP TABLE IF EXISTS Snacks;
 DROP TABLE IF EXISTS Meals;
 DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Customers;
 
--- ✅ Create tables cleanly
+-- CREATE TABLES
 CREATE TABLE Beverages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -23,15 +24,22 @@ CREATE TABLE Meals (
     price REAL NOT NULL
 );
 
+CREATE TABLE Customers (
+    customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
 CREATE TABLE Orders (
     order_id INTEGER PRIMARY KEY AUTOINCREMENT,
     item_name TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     total REAL NOT NULL,
-    order_time TEXT NOT NULL
+    order_time TEXT NOT NULL,
+    customer_id INTEGER NOT NULL
 );
 
--- ✅ Sample data (NO Duplicates)
+-- SAMPLE DATA
 INSERT INTO Beverages (name, price) VALUES
 ('Lemon', 15),
 ('Iced Tea', 20),
