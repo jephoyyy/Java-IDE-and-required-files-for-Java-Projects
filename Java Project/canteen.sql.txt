@@ -1,11 +1,9 @@
--- DELETE OLD TABLES
 DROP TABLE IF EXISTS Beverages;
 DROP TABLE IF EXISTS Snacks;
 DROP TABLE IF EXISTS Meals;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Customers;
 
--- CREATE TABLES
 CREATE TABLE Beverages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -39,7 +37,6 @@ CREATE TABLE Orders (
     customer_id INTEGER NOT NULL
 );
 
--- SAMPLE DATA
 INSERT INTO Beverages (name, price) VALUES
 ('Lemon', 15),
 ('Iced Tea', 20),
