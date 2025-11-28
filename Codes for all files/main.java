@@ -1,33 +1,46 @@
-import java.sql.*;
-import java.util.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.sql.*; // Database related classes, functions
+import java.util.*; // Utilities
+import java.time.LocalDateTime; // Para makuha yung current date and time - Real Time
+import java.time.format.DateTimeFormatter; // Format data into readable form
 
 public class Main {
-    private static Scanner sc = new Scanner(System.in);
-    private static int currentCustomerID = -1;
-    private static List<OrderItem> sessionOrders = new ArrayList<>();
+    private static Scanner sc = new Scanner(System.in); // Para makuha ang input mula sa users
+    private static int currentCustomerID = -1; // Placeholder, para alam ng system saang number mag sstart ang incrementation.
+    private static List<OrderItem> sessionOrders = new ArrayList<>(); // Array na unlimited ang size and no need na mag declare ng size, Ito yung nagsasave ng orders ng mga customers galing sa inputs nila.
 
     static class OrderItem { 
-        String name; int qty; double total;
-        OrderItem(String n,int q,double t){name=n;qty=q;total=t;}
+        String name; 
+        int qty; 
+        double total;
+        
+        OrderItem (String n, int q, double t) { // Statements, Parameter and Constructors
+            name = n;
+            qty = q;
+            total = t;
+        }
     }
 
     public static void main(String[] args){
         while(true){
             System.out.println("=== CANTEEN ORDERING SYSTEM ===");
             System.out.println("[1] User Mode  \n[2] Admin Mode  \n[3] Exit");
-            int mode = readInt("Choose mode: ", 1, 3);
-            if(mode==1){ createCustomer(); userMenu(); }
-            else if(mode==2){ adminLogin(); }
-            else{ System.out.println("Goodbye!"); return; }
+            int mode = readInt("Choose mode: ", 1, 3); // Para siguraduhing valid number sa range 1–3.
+            if (mode==1) { // Start ng decision making sa menu
+                createCustomer(); // Dito nagawa ng bagong customer at start ng incrementation ng ID
+                userMenu(); 
+            } else if (mode==2) { 
+                adminLogin(); 
+            } else { 
+                System.out.println("Goodbye!"); 
+                return; // Exit and terminate the Program
+            }
         }
     }
 
-    private static void createCustomer(){
-        try(Connection conn=Database.connect()){
-            PreparedStatement ps=conn.prepareStatement(
-                "INSERT INTO Customers(customer_name,created_at) VALUES(?,?)",
+    private static void createCustomer() { 
+        try(Connection conn=Database.connect()) { // Temporary connection sa database, gagamitin lang sa current method
+            PreparedStatement ps=conn.prepareStatement( // Method na nag bibigay ng way para makapag create ng sql commands sa main system
+                "INSERT INTO Customers(customer_name, created_at) VALUES(?,?)", // "?" means empty slot sa mga values ng name at date.
                 Statement.RETURN_GENERATED_KEYS);
             ps.setString(1,"Guest"); 
             ps.setString(2,LocalDateTime.now().toString());
@@ -97,8 +110,8 @@ public class Main {
             saveOrder(o);
         }
         System.out.println("--------------------------");
-        System.out.println("TOTAL: P"+total);
-        sessionOrders.clear();
+        System.out.println("TOTAL: P" + total);
+        sessionOrders.clear(); // Para ma-reset yung ArrayList at hindi mag add yung next orders sa previous order
     }
 
     private static void saveOrder(OrderItem o){
