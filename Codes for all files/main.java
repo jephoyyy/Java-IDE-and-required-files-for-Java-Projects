@@ -41,61 +41,61 @@ public class Main {
         try(Connection conn=Database.connect()) { // Temporary connection sa database, gagamitin lang sa current method
             PreparedStatement ps=conn.prepareStatement( // Method na nag bibigay ng way para makapag create ng sql commands sa main system
                 "INSERT INTO Customers(customer_name, created_at) VALUES(?,?)", // "?" means empty slot sa mga values ng name at date.
-                Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1,"Guest"); 
-            ps.setString(2,LocalDateTime.now().toString());
-            ps.executeUpdate();
-            ResultSet rs=ps.getGeneratedKeys();
-            if(rs.next()){
-                currentCustomerID=rs.getInt(1); 
-                System.out.println("\nYour Customer ID: "+currentCustomerID);
+                Statement.RETURN_GENERATED_KEYS); // Taga return ng ID na ginawa
+            ps.setString(1,"Guest"); // Nagiinsert ng value sa unang slot
+            ps.setString(2,LocalDateTime.now().toString()); // Date and Time dun sa pangalawang slot
+            ps.executeUpdate(); // Taga save sa Database
+            ResultSet rs=ps.getGeneratedKeys(); // Nakuha ng na nacreate bago mag order ng previous input
+            if(rs.next()){ //Function for moving into next column
+                currentCustomerID=rs.getInt(1); // Kaya naka 1 is gawa ID ang kukunin hindi yung created_at
+                System.out.println("\nYour Customer ID: "+currentCustomerID); // Print if ano yung ID ni user
             }
-        } catch(Exception e){ System.out.println("Error: "+e.getMessage()); }
+        } catch(Exception e){ System.out.println("Error: "+e.getMessage()); } // Error handling if may errors sa database
     }
 
-    private static void userMenu(){
+    private static void userMenu(){ // Method sa option 1 ng unang MENU
         while(true){
             System.out.println("\n--- USER MENU ---");
             System.out.println("[1] Beverages  \n[2] Snacks  \n[3] Meals  \n[4] Exit  \n[5] Finish Ordering");
-            int choice = readInt("Choose: ",1,5);
+            int choice = readInt("Choose: ",1,5); // Range ulit hangggang 1-5
             switch(choice){
                 case 1 -> showMenu("Beverages");
                 case 2 -> showMenu("Snacks");
                 case 3 -> showMenu("Meals");
-                case 4 -> { return; }
+                case 4 -> { return; } // Exit
                 case 5 -> finishOrder();
             }
         }
     }
 
-    private static void showMenu(String cat){
-        try(Connection conn=Database.connect()){
-            Statement st=conn.createStatement(); 
-            ResultSet rs=st.executeQuery("SELECT * FROM "+cat);
-            List<String> names = new ArrayList<>();
+    private static void showMenu(String cat){ // Method after mamili sa 1-3 option sa userMenu
+        try(Connection conn=Database.connect()){ 
+            Statement st=conn.createStatement();  // Gumagawa ng Statement object para makapag-run ng SQL query sa database
+            ResultSet rs=st.executeQuery("SELECT * FROM "+cat); // I-run ang SQL query at ilagay ang result sa ResultSet para magamit sa program
+            List<String> names = new ArrayList<>(); 
             List<Double> prices = new ArrayList<>();
-            System.out.println("\n--- "+cat+" ---");
+            System.out.println("\n--- "+cat+" ---"); // Header
             while(rs.next()){
-                System.out.printf("%d. %s - P%.2f\n", rs.getInt("id"), rs.getString("name"), rs.getDouble("price"));
-                names.add(rs.getString("name")); prices.add(rs.getDouble("price"));
+                System.out.printf("%d. %s - P%.2f\n", rs.getInt("id"), rs.getString("name"), rs.getDouble("price")); // Taga print ng names, id and price ng products
+                names.add(rs.getString("name")); prices.add(rs.getDouble("price")); // I-store sa memory ang name at price ng product para magamit kapag pumili ang user
             }
-            if(names.isEmpty()){ System.out.println("No items available."); return; }
+            if(names.isEmpty()){ System.out.println("No items available."); return; } // if walang laman ang database
 
-            int n = readInt("Choose item number (0 to go back): ",0,names.size());
-            if(n==0) return;
-            int q = readInt("Quantity: ",1,1000);
-            sessionOrders.add(new OrderItem(names.get(n-1),q,prices.get(n-1)*q));
-            simulateTimer(names.get(n-1));
-            System.out.println("Added to cart: "+q+" x "+names.get(n-1));
+            int n = readInt("Choose item number (0 to go back): ",0,names.size()); // since varying ang size ng products, ito ay hindi naka fixed sa specific size
+            if(n==0) return; // go back to previous menu
+            int q = readInt("Quantity: ",1,1000); // maximum of 1000 ang pwedeng bilhin.
+            sessionOrders.add(new OrderItem(names.get(n-1),q,prices.get(n-1)*q)); // sinasave ang newly added order sa session and this is temporary palang 
+            simulateTimer(names.get(n-1)); // caller para sa method ng queue time based sa napiling name 
+            System.out.println("Added to cart: "+q+" x "+names.get(n-1)); // all are n-1 cause ang inder ng array ay lagi nag sstart sa 0
 
-        } catch(Exception e){ System.out.println("Error: "+e.getMessage()); }
+        } catch(Exception e){ System.out.println("Error: "+e.getMessage()); } // Error handling ulit if may error sa buong method
     }
 
-    private static void simulateTimer(String item){
+    private static void simulateTimer(String item){ // Queue Time/Timer para sa order ng user
         System.out.println("\nPreparing "+item+"...");
-        for(int i=3;i>=1;i--){
-            System.out.println("Ready in "+i+"...");
-            try{ Thread.sleep(500); } catch(Exception ignored){}
+        for(int i=3;i>=1;i--){ // means 3 seconds ang time ng pag prepare
+            System.out.println("Ready in "+i+"..."); // loop print
+            try{ Thread.sleep(500); } catch(Exception ignored){} // 500 milliseconds ang counting kada print ng loop sa taas.
         }
         System.out.println("Order READY!\n");
     }
@@ -110,7 +110,7 @@ public class Main {
             saveOrder(o);
         }
         System.out.println("--------------------------");
-        System.out.println("TOTAL: P" + total);
+        System.out.println("TOTAL: P" + total); // Total and Receipt ng user
         sessionOrders.clear(); // Para ma-reset yung ArrayList at hindi mag add yung next orders sa previous order
     }
 
