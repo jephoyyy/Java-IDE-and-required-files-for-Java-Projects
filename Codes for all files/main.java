@@ -100,34 +100,35 @@ public class Main {
         System.out.println("Order READY!\n");
     }
 
-    private static void finishOrder(){
-        if(sessionOrders.isEmpty()){ System.out.println("No orders yet!"); return;}
+    private static void finishOrder(){ // For option 5
+        if(sessionOrders.isEmpty()){ System.out.println("No orders yet!"); return;} // Check if may laman ang order
         double total=0;
-        System.out.println("\n=== RECEIPT FOR CUSTOMER #"+currentCustomerID+" ===");
-        for(OrderItem o:sessionOrders){
-            System.out.printf("%d x %s .... P%.2f\n", o.qty,o.name,o.total);
-            total+=o.total;
-            saveOrder(o);
+        System.out.println("\n=== RECEIPT FOR CUSTOMER #"+currentCustomerID+" ==="); // Print header
+        for(OrderItem o:sessionOrders){ // Gawa ng object na o for total
+            System.out.printf("%d x %s .... P%.2f\n", o.qty,o.name,o.total); // Print overall nakuha and total
+            total+=o.total; // add yung order mga nakuhang item at price sa buong total
+            saveOrder(o); // method na nag sasave ng order sa database after clicking option 5
         }
         System.out.println("--------------------------");
         System.out.println("TOTAL: P" + total); // Total and Receipt ng user
         sessionOrders.clear(); // Para ma-reset yung ArrayList at hindi mag add yung next orders sa previous order
     }
 
-    private static void saveOrder(OrderItem o){
-        try(Connection conn=Database.connect()){
+    private static void saveOrder(OrderItem o){ // Method para msave ang order sa database and para maging possible ang option 5
+        try(Connection conn=Database.connect()){ 
             PreparedStatement ps=conn.prepareStatement(
-                "INSERT INTO Orders(item_name,quantity,total,order_time,customer_id) VALUES(?,?,?,?,?)");
+                "INSERT INTO Orders(item_name,quantity,total,order_time,customer_id) VALUES(?,?,?,?,?)"); // Ito yung magiging format pag nag view order ka sa admin view
             ps.setString(1,o.name); ps.setInt(2,o.qty); ps.setDouble(3,o.total);
             ps.setString(4,LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             ps.setInt(5,currentCustomerID); 
-            ps.executeUpdate();
+            ps.executeUpdate(); // save sa database
         }catch(Exception e){ System.out.println("Error: "+e.getMessage()); }
     }
 
-    private static void adminLogin(){
+    private static void adminLogin(){ // method for option 1 sa pinaka first menu ng system
         System.out.print("\nEnter admin password: ");
-        if(sc.next().equals("pogiako123")) adminMenu();
+        if(sc.next().equals("pogiako123")) // Dito pwede mag change ng password, and chinecheck if tama ba ang password na na-input
+            adminMenu(); // Method para mashow ang admin menu after mag correct ng password
         else System.out.println("Wrong password.");
     }
 
@@ -137,9 +138,9 @@ public class Main {
             System.out.println("[1] View ALL Orders  \n[2] View Orders by Customer ID  \n[3] Back");
             int choice = readInt("Choose: ",1,3);
             switch(choice){
-                case 1 -> showOrders("ALL",0);
+                case 1 -> showOrders("ALL",0); // Filler value lang
                 case 2 -> {
-                    int custID = readInt("Customer ID: ",1,100000);
+                    int custID = readInt("Customer ID: ",1,100000); // Pick customer id, ranging up to 1-100000
                     showOrders("CUSTOMER", custID);
                 }
                 case 3 -> { return; }
@@ -150,41 +151,39 @@ public class Main {
     private static void showOrders(String type,int customerId){
         try(Connection conn=Database.connect()){
             PreparedStatement ps;
-            if(type.equals("ALL")) ps=conn.prepareStatement("SELECT * FROM Orders");
-            else { ps=conn.prepareStatement("SELECT * FROM Orders WHERE customer_id=?"); ps.setInt(1,customerId); }
+            if(type.equals("ALL")) ps=conn.prepareStatement("SELECT * FROM Orders"); //Generalized ang pag retrieve sa mga orders if mag pick ng option 1 sa menu ng admin
+            else { ps=conn.prepareStatement("SELECT * FROM Orders WHERE customer_id=?"); ps.setInt(1,customerId); } // Isa isa based sa isang specific id
 
-            ResultSet rs=ps.executeQuery();
+            ResultSet rs=ps.executeQuery(); // nagbabalik ng lahat ng rows na nakuha sa database.
             System.out.println(type.equals("ALL")?"\n=== ALL ORDERS ===":"\n=== Orders for Customer #"+customerId+" ===");
 
-            boolean hasOrders = false;
-            while(rs.next()){
-                hasOrders = true;
-                System.out.printf("Order #%d | %s x%d | ₱%.2f | %s | Customer #%d\n",
-                        rs.getInt("order_id"),rs.getString("item_name"),
-                        rs.getInt("quantity"),rs.getDouble("total"),
-                        rs.getString("order_time"),rs.getInt("customer_id"));
+            boolean hasOrders = false; // False kasi hindi pa natin alam kung may makukuhang order sa database
+            while(rs.next()){ // Naglilipat sa next row 
+                hasOrders = true; // if meron laman print ang asa baba
+                System.out.printf("Order #%d | %s x%d | ₱%.2f | %s | Customer #%d\n", // Print format sa view order sa all and specific id
+                        rs.getInt("order_id"), rs.getString("item_name"), rs.getInt("quantity"), rs.getDouble("total"), rs.getString("order_time"), rs.getInt("customer_id"));
             }
-            if(!hasOrders) System.out.println("No orders found.");
-        }catch(Exception e){ System.out.println("Error: "+e.getMessage());}
+            if(!hasOrders) System.out.println("No orders found."); // Check if null ang order
+        }catch(Exception e){ System.out.println("Error: "+e.getMessage());} // Error handling
     }
 
     // Helper method to read integers with range validation
     private static int readInt(String prompt, int min, int max){
         int num;
         while(true){
-            System.out.print(prompt);
-            if(!sc.hasNextInt()){
+            System.out.print(prompt); // Promt is yung mga "Choose", "Enter option" and etc
+            if(!sc.hasNextInt()){ // Check if valid ang napiling option.
                 System.out.println("Invalid input. Enter a number.");
-                sc.next();
-                continue;
+                sc.next(); // nag sskip ng invalid input
+                continue; // balik sa start ng while loop
             }
-            num = sc.nextInt();
-            if(num < min || num > max){
+            num = sc.nextInt(); // Store ang valid int sa variable ng "num"
+            if(num < min || num > max){ // statement na nag ccheck if asa range ba ang napiling int input
                 System.out.println("Number out of range. Try again.");
-                continue;
+                continue; // balik sa start ng while loop
             }
-            break;
+            break; // break pag nakakuha ng valid value
         }
-        return num;
+        return num; // Ibinabalik ang number na valid at nasa range sa caller ng method.
     }
 }
