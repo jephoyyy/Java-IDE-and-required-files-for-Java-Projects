@@ -1,0 +1,4 @@
+DELETE FROM Orders;
+DELETE FROM Customers;
+DELETE FROM sqlite_sequence WHERE name = 'Orders';
+DELETE FROM sqlite_sequence WHERE name = 'Customers';
